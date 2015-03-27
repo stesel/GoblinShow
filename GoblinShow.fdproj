@@ -33,7 +33,7 @@
   <options>
     <option showHiddenPaths="False" />
     <option testMovie="OpenDocument" />
-    <option testMovieCommand="D:\Work\GitHub\GoblinShow\src\com\games\goblinshow\index.html" />
+    <option testMovieCommand="D:\Work\Git\GoblinShow\src\com\games\goblinshow\index.html" />
   </options>
   <!-- Plugin storage -->
   <storage />

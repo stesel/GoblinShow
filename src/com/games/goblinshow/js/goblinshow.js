@@ -7,27 +7,46 @@ var console = window.console || {log:function(message){}};
 
 var canvas;
 var rectangle;
-	
-function drawRectangle()
+
+var startX = 0;
+var startY = 0;
+
+var rWidth = 600;
+var rHeight = 500;
+
+var renderQueue = [];
+
+
+function init()
 {
-	canvas = document.getElementById("myCanvas");
+	_drawRectangle();
+}
+
+function _drawRectangle()
+{
+	canvas = document.getElementById( "canvasLayer" );
 	
 	if (canvas)
 	{
-		console.log("canvas is ready");
+		console.log( "canvas is ready" );
 	}
 	
-	rectangle = canvas.getContext("2d");
+	canvas.width = 600;
+	canvas.height = 500;
 	
-	canvas.width = 200;
-	canvas.height = 200;
-	canvas.style.left = "100px";
-	canvas.style.top = "100px";
-	canvas.style.position = "absolute";
+	rectangle = canvas.getContext( "2d" );
 	
-	
-	rectangle.rect(20,20,150,100);
-	rectangle.stroke();
+	var gradient = rectangle.createLinearGradient( startX,startY, rWidth, rHeight );
+	gradient.addColorStop( 0,"red" );
+	gradient.addColorStop( 1,"blue" );
 
-	console.log("rectangle is drawn");
+	rectangle.fillStyle = gradient;
+	rectangle.fillRect( startX,startY,rWidth,rHeight );
+
+	console.log( "rectangle is drawn" );
+}
+
+function _addBackground()
+{
+	
 }
