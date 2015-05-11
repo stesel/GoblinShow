@@ -20,8 +20,8 @@ var game = (function()
 
 	document.onerror = function (errorMsg, url, lineNumber)
 	{
-		conso.log("Error occured: " + errorMsg);
-	}
+		console.log("Error occured: " + errorMsg);
+	};
 
 	var canvas;
 	var rectangle;
@@ -39,18 +39,21 @@ var game = (function()
 
 	function _initialize()
 	{
-		_drawRectangle();
+		_createCanvas();
 		_addBackground();
 	}
 
-	function _drawRectangle()
+	function _createCanvas()
 	{
 		//canvas = document.getElementById("canvasLayer");
 		canvas = document.createElement("canvas");
+		canvas.id = "canvasContent";
+
+		canvas.style.cursor = "none";
 
 		if (canvas)
 		{
-			console.log("canvas is ready");
+			console.log("canvas is ready" + canvas.id);
 		}
 		else
 		{
@@ -139,6 +142,28 @@ var game = (function()
 	function onBulletImageLoaded()
 	{
 		bulletPool = bulletPoolControl();
+
+		_loadSight();
+	}
+
+	var sightImage;
+
+	function _loadSight()
+	{
+		sightImage = new Image();
+		sightImage.onload = onSightImageLoaded;
+		sightImage.src = "../../../../assets/images/sight.png";
+
+		console.log("sight image is added");
+	}
+
+	var sight;
+
+	function onSightImageLoaded()
+	{
+		var options = {image: sightImage, canvas: canvas, context: rectangle,  obj:hero};
+		sight = sightControl(options);
+
 		_loadSounds();
 	}
 
@@ -178,12 +203,14 @@ var game = (function()
 		//update
 		hero.update(modifier);
 		bulletPool.update(modifier);
+		sight.update();
 		///////////
 
 		//render
 		rectangle.drawImage(backGroundImage, 0, 0);
 		bulletPool.render();
 		hero.render();
+		sight.render();
 		///////////
 
 		// FPS///////////
@@ -207,7 +234,6 @@ var game = (function()
 		var that = {},
 			keysDown = {},
 			deltaX, deltaY,
-			mouseX, mouseY,
 			tickCount = 0, ticksPerFrame = 3,
 			numberOfFrames = options.numberOfFrames || 5;
 
@@ -225,6 +251,8 @@ var game = (function()
 		that.multipleY = 0.5;
 		that.rotation = 0;
 		that.friction = 0.96;
+		that.mouseX = 0;
+		that.mouseY = 0;
 
 		that.imageLoaded = false;
 
@@ -249,17 +277,17 @@ var game = (function()
 		{
 			if(event.offsetX)
 			{
-				mouseX = event.offsetX;
-				mouseY = event.offsetY;
+				that.mouseX = event.offsetX;
+				that.mouseY = event.offsetY;
 			}
 			else if(event.layerX)
 			{
-				mouseX = event.layerX;
-				mouseY = event.layerY;
+				that.mouseX = event.layerX;
+				that.mouseY = event.layerY;
 			}
 		}
 
-		function onClick(event)
+		function onClick()
 		{
 			that.onClick();
 		}
@@ -300,8 +328,8 @@ var game = (function()
 
 			//Rotation logics
 			///////////////////////////
-			deltaX = mouseX - that.x;
-			deltaY = mouseY - that.y;
+			deltaX = that.mouseX - that.x;
+			deltaY = that.mouseY - that.y;
 			that.rotation = - Math.atan2(deltaX, deltaY) + Math.PI;
 
 			//Sprite animation logics
@@ -341,6 +369,47 @@ var game = (function()
 			that.context.restore();
 		};
 
+
+		return that;
+	}
+
+	function sightControl(options)
+	{
+		var that = {};
+
+		that.image = options.image;
+		that.canvas = options.canvas;
+		that.context = options.context;
+
+		that.obj = options.obj;
+
+		that.x = options.obj.mouseX;
+		that.y = options.obj.mouseY;
+
+		that.update = function()
+		{
+			that.x = that.obj.mouseX;
+			that.y = that.obj.mouseY;
+		};
+
+		that.render = function()
+		{
+			that.context.save();
+			that.context.translate(that.x, that.y);
+
+			that.context.drawImage(
+				that.image,
+				0,
+				0,
+				that.image.width,
+				that.image.height,
+				- that.image.width >> 1,
+				- that.image.height >> 1,
+				that.image.width,
+				that.image.height);
+
+			that.context.restore();
+		};
 
 		return that;
 	}
