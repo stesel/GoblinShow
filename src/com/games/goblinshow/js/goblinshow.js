@@ -8,15 +8,15 @@ var GoblinShow;
 var game = (function()
 {
 	//var console = window.console || { log: function (message) {	} };
-	var console = { log : _log };
+	//var console = { log : _log };
 
-	function _log(message)
-	{
-		var logArea = document.getElementById("logArea");
-		var text = document.createTextNode("\n" + message);
-		logArea.appendChild(text);
-		logArea.scrollTop = logArea.scrollHeight;
-	}
+	//function _log(message)
+	//{
+	//	var logArea = document.getElementById("logArea");
+	//	var text = document.createTextNode("\n" + message);
+	//	logArea.appendChild(text);
+	//	logArea.scrollTop = logArea.scrollHeight;
+	//}
 
 	document.onerror = function (errorMsg, url, lineNumber)
 	{
@@ -53,7 +53,7 @@ var game = (function()
 
 		if (canvas)
 		{
-			console.log("canvas is ready" + canvas.id);
+			console.log("canvas is ready: " + canvas.id);
 		}
 		else
 		{
@@ -78,13 +78,12 @@ var game = (function()
 		console.log("rectangle is drawn");
 	}
 
-	var backGroundImageLoaded = false;
 	var backGroundImage;
 
 	function _addBackground()
 	{
 		backGroundImage = new Image();
-		backGroundImage.onload = function(){ backGroundImageLoaded = true; _addHero(); };
+		backGroundImage.onload = function(){ _addHero(); };
 		backGroundImage.src = "../../../../assets/images/background.jpg";
 
 		console.log("background image is added");
@@ -121,7 +120,7 @@ var game = (function()
 	function onHeroImageLoaded()
 	{
 		var options = {image: heroImage, canvas: canvas, context: rectangle, animation: true, loop: true};
-		hero = spriteController(options);
+		hero = new HeroControl(options);
 
 		_loadBullet();
 	}
@@ -141,7 +140,7 @@ var game = (function()
 
 	function onBulletImageLoaded()
 	{
-		bulletPool = bulletPoolControl();
+		bulletPool = new BulletPoolControl();
 
 		_loadSight();
 	}
@@ -162,7 +161,9 @@ var game = (function()
 	function onSightImageLoaded()
 	{
 		var options = {image: sightImage, canvas: canvas, context: rectangle,  obj:hero};
-		sight = sightControl(options);
+		sight = new SightControl(options);
+		sight.x = 40;
+		console.log("sight.x: " + sight.x);
 
 		_loadSounds();
 	}
@@ -170,7 +171,7 @@ var game = (function()
 	function _addEventListeners()
 	{
 		hero.addListeners();
-		hero.onClick = onHeroClick;
+		hero.onHeroClick = onHeroClick;
 		console.log("key listeners are added");
 	}
 
@@ -229,283 +230,6 @@ var game = (function()
 			requestAnimationFrame(_update);
 	}
 
-	function spriteController(options)
-	{
-		var that = {},
-			keysDown = {},
-			deltaX, deltaY,
-			tickCount = 0, ticksPerFrame = 3,
-			numberOfFrames = options.numberOfFrames || 5;
-
-		that.x = 300;
-		that.y = 250;
-		that.width = options.width || 128;
-		that.height = options.height || 128;
-		that.loop = options.loop || false;
-		that.animation = options.animation || false;
-		that.frameIndex = 0;
-		that.speed = 256;
-		that.speedX = 0;
-		that.speedY = 0;
-		that.multipleX = 0.5;
-		that.multipleY = 0.5;
-		that.rotation = 0;
-		that.friction = 0.96;
-		that.mouseX = 0;
-		that.mouseY = 0;
-
-		that.imageLoaded = false;
-
-		that.onClick = function()
-		{
-			console.log("override click handler");
-		};
-
-		that.image = options.image;
-		that.canvas = options.canvas;
-		that.context = options.context;
-
-		that.addListeners = function()
-		{
-			addEventListener("keydown", function (event){ keysDown[event.keyCode] = true }, false);
-			addEventListener("keyup", function (event){ delete keysDown[event.keyCode] }, false);
-			that.canvas.addEventListener("mousemove", onMouseMove, false);
-			that.canvas.addEventListener("click", onClick, false);
-		};
-
-		function onMouseMove(event)
-		{
-			if(event.offsetX)
-			{
-				that.mouseX = event.offsetX;
-				that.mouseY = event.offsetY;
-			}
-			else if(event.layerX)
-			{
-				that.mouseX = event.layerX;
-				that.mouseY = event.layerY;
-			}
-		}
-
-		function onClick()
-		{
-			that.onClick();
-		}
-
-		that.update = function(modifier)
-		{
-			//Movement logics
-			//////////////////////////
-			if (38 in keysDown || 87 in keysDown)
-				that.speedY = - that.speed * modifier;
-
-			if (40 in keysDown || 83 in keysDown)
-				that.speedY = that.speed * modifier;
-
-			if (37 in keysDown || 65 in keysDown)
-				that.speedX = - that.speed * modifier;
-
-			if (39 in keysDown || 68 in keysDown)
-				that.speedX = that.speed * modifier;
-
-			that.x += that.speedX;
-			that.y += that.speedY;
-
-			///bounds
-			if (that.x > that.canvas.width)
-				that.x = that.canvas.width;
-			if (that.x < 0)
-				that.x = 0;
-			if (that.y > that.canvas.height)
-				that.y = that.canvas.height;
-			if (that.y < 0)
-				that.y = 0;
-
-
-			that.speedX *= that.friction;
-			that.speedY *= that.friction;
-			////////////////////////////
-
-			//Rotation logics
-			///////////////////////////
-			deltaX = that.mouseX - that.x;
-			deltaY = that.mouseY - that.y;
-			that.rotation = - Math.atan2(deltaX, deltaY) + Math.PI;
-
-			//Sprite animation logics
-			if(!that.animation)
-				return;
-
-			tickCount += 1;
-
-			if (tickCount > ticksPerFrame)
-			{
-				tickCount = 0;
-
-				if (that.frameIndex < numberOfFrames - 1)
-					that.frameIndex += 1;
-				else if	(that.loop)
-					that.frameIndex = 0;
-			}
-		};
-
-		that.render= function()
-		{
-			that.context.save();
-			that.context.translate(that.x, hero.y);
-			that.context.rotate(that.rotation);
-
-			that.context.drawImage(
-				that.image,
-				that.frameIndex * that.image.width / numberOfFrames,
-				0,
-				that.width,
-				that.height,
-				- that.width >> 1,
-				- that.width >> 1,
-				that.width,
-				that.height);
-
-			that.context.restore();
-		};
-
-
-		return that;
-	}
-
-	function sightControl(options)
-	{
-		var that = {};
-
-		that.image = options.image;
-		that.canvas = options.canvas;
-		that.context = options.context;
-
-		that.obj = options.obj;
-
-		that.x = options.obj.mouseX;
-		that.y = options.obj.mouseY;
-
-		that.update = function()
-		{
-			that.x = that.obj.mouseX;
-			that.y = that.obj.mouseY;
-		};
-
-		that.render = function()
-		{
-			that.context.save();
-			that.context.translate(that.x, that.y);
-
-			that.context.drawImage(
-				that.image,
-				0,
-				0,
-				that.image.width,
-				that.image.height,
-				- that.image.width >> 1,
-				- that.image.height >> 1,
-				that.image.width,
-				that.image.height);
-
-			that.context.restore();
-		};
-
-		return that;
-	}
-
-	function bulletControl(options)
-	{
-		var that = {};
-
-		that.active = true;
-
-		that.image = options.image;
-		that.canvas = options.canvas;
-		that.context = options.context;
-		that.rotation = options.owner.rotation;
-		that.phaseX = Math.cos(that.rotation - Math.PI * .5);
-		that.phaseY = Math.sin(that.rotation - Math.PI * .5);
-		that.speed = 384;
-		that.x = options.owner.x + options.owner.width * .1 * that.phaseX;
-		that.y = options.owner.y + options.owner.height * .1 * that.phaseY;
-		that.speedX = that.speed * that.phaseX;
-		that.speedY = that.speed * that.phaseY;
-
-		that.update = function(modifier)
-		{
-			that.x += that.speedX * modifier;
-			that.y += that.speedY * modifier;
-
-
-			if (that.x < - that.image.height
-				|| that.x > that.canvas.width + that.image.height
-				|| that.y < - that.image.height
-				|| that.y > that.canvas.height)
-				that.active = false;
-		};
-
-		that.render = function()
-		{
-			that.context.save();
-			that.context.translate(that.x, that.y);
-			that.context.rotate(that.rotation);
-			that.context.drawImage(
-				that.image,
-				0,
-				0,
-				that.image.width,
-				that.image.height,
-				- that.image.width >> 1,
-				- that.image.height >> 1,
-				that.image.width,
-				that.image.height);
-
-			that.context.restore();
-		};
-
-		return that;
-	}
-
-	function bulletPoolControl()
-	{
-		var that = {},
-			index,
-			bullet,
-			bulletList = [];
-
-		that.add = function(bullet)
-		{
-			bulletList.push(bullet);
-		};
-
-		that.update = function(modifier)
-		{
-			for (index = 0; index < bulletList.length; index ++)
-			{
-				bullet = bulletList[index];
-				if (bullet.active)
-					bullet.update(modifier);
-				else
-				{
-					bulletList.splice(index, 1);
-				}
-			}
-		};
-
-		that.render = function()
-		{
-			for (index = 0; index < bulletList.length; index ++)
-			{
-				bullet = bulletList[index];
-				if (bullet.active)
-					bullet.render();
-			}
-		};
-
-		return that;
-	}
-
 	function onHeroClick()
 	{
 		addBullet();
@@ -517,7 +241,7 @@ var game = (function()
 	function addBullet()
 	{
 		var options = {image: bulletImage, canvas: canvas, context: rectangle,  owner:hero};
-		var bullet = bulletControl(options);
+		var bullet = new BulletControl(options);
 		bulletPool.add(bullet);
 	}
 
