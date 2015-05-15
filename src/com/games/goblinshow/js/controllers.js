@@ -145,43 +145,49 @@ function SightControl(options)
 
 function HeroControl(options)
 {
-    var keysDown = {},
+    var that = {},
+		keysDown = {},
         deltaX, deltaY,
         tickCount = 0, ticksPerFrame = 3,
         numberOfFrames = options.numberOfFrames || 5;
 
-    this.x = 300;
-    this.y = 250;
-    this.width = options.width || 128;
-    this.height = options.height || 128;
-    this.loop = options.loop || false;
-    this.animation = options.animation || false;
-    this.frameIndex = 0;
-    this.speed = 256;
-    this.speedX = 0;
-    this.speedY = 0;
-    this.multipleX = 0.5;
-    this.multipleY = 0.5;
-    this.rotation = 0;
-    this.friction = 0.96;
-    this.mouseX = 0;
-    this.mouseY = 0;
+    that.x = 300;
+    that.y = 250;
+    that.width = options.width || 128;
+    that.height = options.height || 128;
+    that.loop = options.loop || false;
+    that.animation = options.animation || false;
+    that.frameIndex = 0;
+    that.speed = 256;
+    that.speedX = 0;
+    that.speedY = 0;
+    that.multipleX = 0.5;
+    that.multipleY = 0.5;
+    that.rotation = 0;
+    that.friction = 0.96;
+    that.mouseX = 0;
+    that.mouseY = 0;
 
-    this.imageLoaded = false;
+    that.imageLoaded = false;
 
-    this.image = options.image;
-    this.canvas = options.canvas;
-    this.context = options.context;
+    that.image = options.image;
+    that.canvas = options.canvas;
+    that.context = options.context;
 
-    this.addListeners = function()
+    that.addListeners = function()
     {
         addEventListener("keydown", function (event){ keysDown[event.keyCode] = true }, false);
         addEventListener("keyup", function (event){ delete keysDown[event.keyCode] }, false);
-        this.canvas.addEventListener("mousemove", onMouseMove, false);
-        this.canvas.addEventListener("click", this.onHeroClick, false);
+        that.canvas.addEventListener("mousemove", onMouseMove, false);
+        that.canvas.addEventListener("click", onClick, false);
     };
+	
+	function onClick(e)
+	{
+		 that.onHeroClick();
+	}
 
-    this.onHeroClick = function()
+    that.onHeroClick = function()
     {
         console.log("override click handler");
     };
@@ -190,13 +196,13 @@ function HeroControl(options)
     {
         if(event.offsetX)
         {
-            this.mouseX = event.offsetX;
-            this.mouseY = event.offsetY;
+            that.mouseX = event.offsetX;
+            that.mouseY = event.offsetY;
         }
         else if(event.layerX)
         {
-            this.mouseX = event.layerX;
-            this.mouseY = event.layerY;
+            that.mouseX = event.layerX;
+            that.mouseY = event.layerY;
         }
     }
 
@@ -205,48 +211,48 @@ function HeroControl(options)
         onHeroClick();
     }
 
-    this.update = function(modifier)
+    that.update = function(modifier)
     {
         //Movement logics
         //////////////////////////
         if (38 in keysDown || 87 in keysDown)
-            this.speedY = - this.speed * modifier;
+            that.speedY = - that.speed * modifier;
 
         if (40 in keysDown || 83 in keysDown)
-            this.speedY = this.speed * modifier;
+            that.speedY = that.speed * modifier;
 
         if (37 in keysDown || 65 in keysDown)
-            this.speedX = - this.speed * modifier;
+            that.speedX = - that.speed * modifier;
 
         if (39 in keysDown || 68 in keysDown)
-            this.speedX = this.speed * modifier;
+            that.speedX = that.speed * modifier;
 
-        this.x += this.speedX;
-        this.y += this.speedY;
+        that.x += that.speedX;
+        that.y += that.speedY;
 
         ///bounds
-        if (this.x > this.canvas.width)
-            this.x = this.canvas.width;
-        if (this.x < 0)
-            this.x = 0;
-        if (this.y > this.canvas.height)
-            this.y = this.canvas.height;
-        if (this.y < 0)
-            this.y = 0;
+        if (that.x > that.canvas.width)
+            that.x = that.canvas.width;
+        if (that.x < 0)
+            that.x = 0;
+        if (that.y > that.canvas.height)
+            that.y = that.canvas.height;
+        if (that.y < 0)
+            that.y = 0;
 
 
-        this.speedX *= this.friction;
-        this.speedY *= this.friction;
+        that.speedX *= that.friction;
+        that.speedY *= that.friction;
         ////////////////////////////
 
         //Rotation logics
         ///////////////////////////
-        deltaX = this.mouseX - this.x;
-        deltaY = this.mouseY - this.y;
-        this.rotation = - Math.atan2(deltaX, deltaY) + Math.PI;
+        deltaX = that.mouseX - that.x;
+        deltaY = that.mouseY - that.y;
+        that.rotation = - Math.atan2(deltaX, deltaY) + Math.PI;
 
         //Sprite animation logics
-        if(!this.animation)
+        if(!that.animation)
             return;
 
         tickCount += 1;
@@ -255,33 +261,33 @@ function HeroControl(options)
         {
             tickCount = 0;
 
-            if (this.frameIndex < numberOfFrames - 1)
-                this.frameIndex += 1;
-            else if	(this.loop)
-                this.frameIndex = 0;
+            if (that.frameIndex < numberOfFrames - 1)
+                that.frameIndex += 1;
+            else if	(that.loop)
+                that.frameIndex = 0;
         }
     };
 
-    this.render = function()
+    that.render = function()
     {
-        this.context.save();
-        this.context.translate(this.x, this.y);
-        this.context.rotate(this.rotation);
+        that.context.save();
+        that.context.translate(that.x, that.y);
+        that.context.rotate(that.rotation);
 
-        this.context.drawImage(
-            this.image,
-            this.frameIndex * this.image.width / numberOfFrames,
+        that.context.drawImage(
+            that.image,
+            that.frameIndex * that.image.width / numberOfFrames,
             0,
-            this.width,
-            this.height,
-            - this.width >> 1,
-            - this.width >> 1,
-            this.width,
-            this.height);
+            that.width,
+            that.height,
+            - that.width >> 1,
+            - that.width >> 1,
+            that.width,
+            that.height);
 
-        this.context.restore();
+        that.context.restore();
     };
 
 
-    return this;
+    return that;
 }
