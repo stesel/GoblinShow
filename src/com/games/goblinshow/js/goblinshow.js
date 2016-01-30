@@ -32,6 +32,11 @@ var game = (function()
 	var rWidth = 600;
 	var rHeight = 500;
 
+	var parallaxFactor = 0.02;
+
+	var defaultBackgroundX;
+	var defaultBackgroundY;
+
 	var hero;
 
 	var _rendering = false;
@@ -84,7 +89,7 @@ var game = (function()
 	{
 		backGroundImage = new Image();
 		backGroundImage.onload = function(){ _addHero(); };
-		backGroundImage.src = "../../../../assets/images/background.jpg";
+		backGroundImage.src = "../../../../assets/images/background_parallax.jpg";
 
 		console.log("background image is added");
 	}
@@ -111,6 +116,9 @@ var game = (function()
 
 	function _addHero()
 	{
+		defaultBackgroundX = (rWidth - backGroundImage.width) * .5;
+		defaultBackgroundY = (rHeight - backGroundImage.height) * .5;
+
 		heroImage = new Image();
 		heroImage.onload = onHeroImageLoaded;
 		heroImage.src = "../../../../assets/images/herosprite.png";
@@ -208,7 +216,9 @@ var game = (function()
 		///////////
 
 		//render
-		rectangle.drawImage(backGroundImage, 0, 0);
+		rectangle.drawImage(backGroundImage,
+							defaultBackgroundX + (rWidth *.5 - hero.x) * parallaxFactor,
+							defaultBackgroundY + (rHeight *.5 - hero.y) * parallaxFactor);
 		bulletPool.render();
 		hero.render();
 		sight.render();
