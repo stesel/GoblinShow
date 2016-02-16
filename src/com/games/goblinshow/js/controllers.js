@@ -31,11 +31,15 @@ function BulletControl(options)
     this.context = options.context;
 
     this.rotation = options.owner.rotation;
+	
     this.phaseX = Math.cos(this.rotation - Math.PI * .5);
     this.phaseY = Math.sin(this.rotation - Math.PI * .5);
+	
     this.speed = 384;
+	
     this.x = options.owner.x + options.owner.width * .1 * this.phaseX;
     this.y = options.owner.y + options.owner.height * .1 * this.phaseY;
+	
     this.speedX = this.speed * this.phaseX;
     this.speedY = this.speed * this.phaseY;
 
