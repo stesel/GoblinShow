@@ -125,6 +125,15 @@ var game = (function()
 		console.log("hero is added");
 	}
 
+	var enemyImage;
+
+	function _loadEnemy()
+	{
+		enemyImage = new Image();
+		enemyImage.onload = onEnemyImageLoaded;
+		enemyImage.src =
+	}
+
 	function onHeroImageLoaded()
 	{
 		var options = {image: heroImage, canvas: canvas, context: rectangle, animation: true, loop: true};
