@@ -295,3 +295,65 @@ function HeroControl(options)
 
     return that;
 }
+
+function EnemyControl(options)
+{
+    var that = {};
+
+    that.numberOfFrames = options.numberOfFrames || 5;
+
+    that.image = options.image;
+    that.canvas = options.canvas;
+    that.context = options.context;
+
+    that.x = 300;
+    that.y = 250;
+    that.width = options.width || 128;
+    that.height = options.height || 128;
+    that.loop = options.loop || false;
+    that.animation = options.animation || false;
+
+    that.tickCount = 0;
+    that.ticksPerFrame = 3;
+
+    that.update = function(modifier)
+    {
+        //Sprite animation logics
+        if(!that.animation)
+            return;
+
+        that.tickCount += 1;
+
+        if (that.tickCount > that.ticksPerFrame)
+        {
+            that.tickCount = 0;
+
+            if (that.frameIndex < that.numberOfFrames - 1)
+                that.frameIndex += 1;
+            else if	(that.loop)
+                that.frameIndex = 0;
+        }
+    };
+
+    that.render = function()
+    {
+        that.context.save();
+        that.context.translate(that.x, that.y);
+        that.context.rotate(that.rotation);
+
+        that.context.drawImage(
+            that.image,
+            that.frameIndex * that.image.width / that.numberOfFrames,
+            0,
+            that.width,
+            that.height,
+            - that.width >> 1,
+            - that.width >> 1,
+            that.width,
+            that.height);
+
+        that.context.restore();
+    };
+
+    return that;
+}

@@ -131,7 +131,18 @@ var game = (function()
 	{
 		enemyImage = new Image();
 		enemyImage.onload = onEnemyImageLoaded;
-		enemyImage.src =
+		enemyImage.src = "../../../../assets/images/enemysprite.png";
+		console.log("enemy is added");
+	}
+	
+	var enemyPool;
+	
+	function onEnemyImageLoaded() 
+	{
+		var options = {image: enemyImage, canvas: canvas, context: rectangle, animation: true, loop: true};
+		enemyPool = new EnemyControl(options);
+		
+		_loadSounds();
 	}
 
 	function onHeroImageLoaded()
@@ -182,7 +193,7 @@ var game = (function()
 		sight.x = 40;
 		console.log("sight.x: " + sight.x);
 
-		_loadSounds();
+		_loadEnemy();
 	}
 
 	function _addEventListeners()
@@ -220,6 +231,7 @@ var game = (function()
 
 		//update
 		hero.update(modifier);
+		enemyPool.update(modifier);
 		bulletPool.update(modifier);
 		sight.update();
 		///////////
@@ -229,6 +241,7 @@ var game = (function()
 							defaultBackgroundX + (rWidth *.5 - hero.x) * parallaxFactor,
 							defaultBackgroundY + (rHeight *.5 - hero.y) * parallaxFactor);
 		bulletPool.render();
+		enemyPool.render();
 		hero.render();
 		sight.render();
 		///////////
