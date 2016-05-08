@@ -302,6 +302,13 @@ function EnemyControl(options)
 
     that.numberOfFrames = options.numberOfFrames || 5;
 
+    that.speed = options.speed || 0.5;
+
+    that.rotation = 0;
+
+    that.phaseX = Math.cos(that.rotation - Math.PI * .5);
+    that.phaseY = Math.sin(that.rotation - Math.PI * .5);
+
     that.image = options.image;
     that.canvas = options.canvas;
     that.context = options.context;
@@ -318,6 +325,10 @@ function EnemyControl(options)
 
     that.update = function(modifier)
     {
+        that.x += that.speed * that.phaseX;
+        that.y += that.speed * that.phaseY;
+
+
         //Sprite animation logics
         if(!that.animation)
             return;
