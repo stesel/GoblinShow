@@ -302,7 +302,7 @@ function EnemyControl(options)
 
     that.numberOfFrames = options.numberOfFrames || 5;
 
-    that.speed = options.speed || 0.5;
+    that.speed = options.speed || 2.7;
 
     that.rotation = 0;
 
@@ -313,8 +313,8 @@ function EnemyControl(options)
     that.canvas = options.canvas;
     that.context = options.context;
 
-    that.x = 300;
-    that.y = 250;
+    that.x = that.initialX = options.x || 300;
+    that.y = that.initialY = options.y || 250;
     that.width = options.width || 128;
     that.height = options.height || 128;
     that.loop = options.loop || false;
@@ -325,6 +325,13 @@ function EnemyControl(options)
 
     that.update = function(modifier)
     {
+
+        if(that.y < - that.height/2)
+        {
+            that.x = that.width/2 + Math.random()* (that.canvas.width - that.width/2);
+            that.y = that.initialY;
+        }
+
         that.x += that.speed * that.phaseX;
         that.y += that.speed * that.phaseY;
 
