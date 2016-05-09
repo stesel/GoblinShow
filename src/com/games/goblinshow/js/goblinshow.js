@@ -191,7 +191,6 @@ var game = (function()
 		var options = {image: sightImage, canvas: canvas, context: rectangle,  obj:hero};
 		sight = new SightControl(options);
 		sight.x = 40;
-		console.log("sight.x: " + sight.x);
 
 		_loadEnemy();
 	}
@@ -241,8 +240,8 @@ var game = (function()
 							defaultBackgroundX + (rWidth *.5 - hero.x) * parallaxFactor,
 							defaultBackgroundY + (rHeight *.5 - hero.y) * parallaxFactor);
 		bulletPool.render();
-		enemyPool.render();
 		hero.render();
+		enemyPool.render();
 		sight.render();
 		///////////
 
