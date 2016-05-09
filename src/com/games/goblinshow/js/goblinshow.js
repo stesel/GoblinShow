@@ -89,7 +89,7 @@ var game = (function()
 	{
 		backGroundImage = new Image();
 		backGroundImage.onload = function(){ _addHero(); };
-		backGroundImage.src = "../../../../assets/images/background_parallax.jpg";
+		backGroundImage.src = "assets/images/background_parallax.jpg";
 
 		console.log("background image is added");
 	}
