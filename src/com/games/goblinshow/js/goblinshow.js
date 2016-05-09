@@ -100,7 +100,7 @@ var game = (function()
 	{
 		shootSound = new Audio();
 		shootSound.addEventListener("canplaythrough", onAudioLoaded, false);
-		shootSound.src = "../../../../assets/sounds/laser.mp3";
+		shootSound.src = "assets/sounds/laser.mp3";
 	}
 
 	function onAudioLoaded(event)
@@ -121,7 +121,7 @@ var game = (function()
 
 		heroImage = new Image();
 		heroImage.onload = onHeroImageLoaded;
-		heroImage.src = "../../../../assets/images/herosprite.png";
+		heroImage.src = "assets/images/herosprite.png";
 		console.log("hero is added");
 	}
 
@@ -131,7 +131,7 @@ var game = (function()
 	{
 		enemyImage = new Image();
 		enemyImage.onload = onEnemyImageLoaded;
-		enemyImage.src = "../../../../assets/images/enemysprite.png";
+		enemyImage.src = "assets/images/enemysprite.png";
 		console.log("enemy is added");
 	}
 	
@@ -159,7 +159,7 @@ var game = (function()
 	{
 		bulletImage = new Image();
 		bulletImage.onload = onBulletImageLoaded;
-		bulletImage.src = "../../../../assets/images/bullet.png";
+		bulletImage.src = "assets/images/bullet.png";
 
 		console.log("bullet image is added");
 	}
@@ -179,7 +179,7 @@ var game = (function()
 	{
 		sightImage = new Image();
 		sightImage.onload = onSightImageLoaded;
-		sightImage.src = "../../../../assets/images/sight.png";
+		sightImage.src = "assets/images/sight.png";
 
 		console.log("sight image is added");
 	}
