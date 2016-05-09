@@ -139,7 +139,7 @@ var game = (function()
 	
 	function onEnemyImageLoaded() 
 	{
-		var options = {image: enemyImage, canvas: canvas, context: rectangle, animation: true, loop: true};
+		var options = {image: enemyImage, canvas: canvas, context: rectangle, animation: true, loop: true, x: canvas.width / 2, y: canvas.height};
 		enemyPool = new EnemyControl(options);
 		
 		_loadSounds();
