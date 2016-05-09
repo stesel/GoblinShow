@@ -304,17 +304,10 @@ function EnemyControl(options)
 
     that.speed = options.speed || 2.7;
 
-    that.rotation = 0;
-
-    that.phaseX = Math.cos(that.rotation - Math.PI * .5);
-    that.phaseY = Math.sin(that.rotation - Math.PI * .5);
-
     that.image = options.image;
     that.canvas = options.canvas;
     that.context = options.context;
 
-    that.x = that.initialX = options.x || 300;
-    that.y = that.initialY = options.y || 250;
     that.width = options.width || 128;
     that.height = options.height || 128;
     that.loop = options.loop || false;
@@ -323,13 +316,52 @@ function EnemyControl(options)
     that.tickCount = 0;
     that.ticksPerFrame = 3;
 
+    that.active = true;
+
+    setPosition();
+
+    function setPosition()
+    {
+        var index = Math.floor(Math.random() * 4);
+
+        switch (index)
+        {
+            case 1:
+                that.rotation = 0;
+                that.x = that.width / 2 + Math.random() * (that.canvas.width - that.width / 2);
+                that.y = that.canvas.height + that.height / 2;
+                break;
+            case 2:
+                that.rotation = Math.PI / 2;
+                that.x = - that.width / 2;
+                that.y = that.height / 2 + Math.random() * (that.canvas.height - that.height / 2);
+                break;
+            case 3:
+                that.rotation = Math.PI;
+                that.x = that.width / 2 + Math.random() * (that.canvas.width - that.width / 2);
+                that.y = - that.height / 2;
+                break;
+            case 0:
+            default:
+                that.rotation = - Math.PI / 2;
+                that.x = that.canvas.width + that.width / 2;
+                that.y = that.height / 2 + Math.random() * (that.canvas.height - that.height / 2);
+                break;
+        }
+
+        that.phaseX = Math.cos(that.rotation - Math.PI * .5);
+        that.phaseY = Math.sin(that.rotation - Math.PI * .5);
+    }
+
     that.update = function(modifier)
     {
 
-        if(that.y < - that.height/2)
+        if (that.y < - that.height/2
+            || that.y > that.canvas.height + that.height/2
+            || that.x < - that.width/2
+            || that.x > that.canvas.width + that.width/2)
         {
-            that.x = that.width/2 + Math.random()* (that.canvas.width - that.width/2);
-            that.y = that.initialY;
+            setPosition();
         }
 
         that.x += that.speed * that.phaseX;
@@ -372,6 +404,57 @@ function EnemyControl(options)
 
         that.context.restore();
     };
+
+    return that;
+}
+
+function EnemyPool(options)
+{
+    var that = {},
+        index = 0,
+        enemy,
+        enemieslist = [];
+
+
+    that.count = options.count || 10;
+    that.timeout = options.timeout || 1500;
+
+    onTimeout();
+
+    function onTimeout()
+    {
+        if(that.count >0)
+        {
+            enemy = new EnemyControl(options)
+            enemieslist.push(enemy);
+            that.count--;
+            setTimeout(onTimeout, that.timeout);
+        }
+    }
+
+    that.update = function(modifier)
+    {
+        for (index = 0; index < enemieslist.length; index ++)
+        {
+            enemy = enemieslist[index];
+
+            if (enemy.active)
+                enemy.update(modifier);
+            else
+                enemieslist.splice(index, 1);
+        }
+    }
+
+    that.render = function()
+    {
+        for (index = 0; index < enemieslist.length; index ++)
+        {
+            enemy = enemieslist[index];
+
+            if (enemy.active)
+                enemy.render();
+        }
+    }
 
     return that;
 }
