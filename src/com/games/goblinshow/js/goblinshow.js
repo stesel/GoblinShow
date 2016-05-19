@@ -41,6 +41,7 @@ var game = (function()
 
 	var _rendering = false;
 
+	var stainPool;
 
 	function _initialize()
 	{
@@ -95,21 +96,49 @@ var game = (function()
 	}
 
 	var shootSound;
+	var squeakSound;
+	var ouchSound;
 
 	function _loadSounds()
+	{
+		_loadShootSound();
+	}
+
+	function _loadShootSound()
 	{
 		shootSound = new Audio();
 		shootSound.addEventListener("canplaythrough", onAudioLoaded, false);
 		shootSound.src = "assets/sounds/laser.mp3";
 	}
 
+	function _loadSqueakSound()
+	{
+		squeakSound = new Audio();
+		squeakSound.addEventListener("canplaythrough", onAudioLoaded, false);
+		squeakSound.src = "assets/sounds/squeak.mp3";
+	}
+
+	function _loadOuchSound()
+	{
+		ouchSound = new Audio();
+		ouchSound.addEventListener("canplaythrough", onAudioLoaded, false);
+		ouchSound.src = "assets/sounds/ouch.mp3";
+	}
+
 	function onAudioLoaded(event)
 	{
 		event.target.removeEventListener("canplaythrough", onAudioLoaded);
-		console.log("audio is loaded");
+		console.log(event.target.src + " is loaded");
 
-		_addEventListeners();
-		_startRendering();
+		if (!squeakSound)
+			_loadSqueakSound();
+		if (!ouchSound)
+			_loadOuchSound();
+		else if(shootSound.readyState == 4 && squeakSound.readyState == 4 && ouchSound.readyState == 4)
+		{
+			_addEventListeners();
+			_startRendering();
+		}
 	}
 
 	var heroImage;
@@ -139,10 +168,51 @@ var game = (function()
 	
 	function onEnemyImageLoaded() 
 	{
-		var options = {image: enemyImage, canvas: canvas, context: rectangle, animation: true, loop: true, x: canvas.width / 2, y: canvas.height, count: 12};
+		var options = {image: enemyImage, canvas: canvas, context: rectangle, animation: true, loop: true, x: canvas.width / 2, y: canvas.height, count: 12, target: hero};
 		enemyPool = new EnemyPool(options);
-		
+		enemyPool.onEnemiesDead = onEnemiesDead;
+		enemyPool.onEnemyDead = onTargetDead;
+
+		_loadStain();
+	}
+
+	var stainImage;
+
+	function _loadStain()
+	{
+		stainImage = new Image();
+		stainImage.onload = onStainImageLoaded;
+		stainImage.src = "assets/images/stainsprite.png";
+	}
+
+	function onStainImageLoaded()
+	{
+		stainPool = new StainPool();
+
 		_loadSounds();
+	}
+
+	var resultText;
+
+	function onTargetDead(target)
+	{
+		var options = {image: stainImage, canvas: canvas, context: rectangle, target: target};
+		var stain = new StainControl(options);
+
+		stainPool.add(stain);
+
+		squeakSound.currentTime = 0;
+		squeakSound.play();
+	}
+
+	function onEnemiesDead()
+	{
+		hero.onHeroClick = function(){};
+		hero.onHeroDead = function(){};
+
+		hero.confused = true;
+
+		resultText = "YOU WIN";
 	}
 
 	function onHeroImageLoaded()
@@ -199,7 +269,27 @@ var game = (function()
 	{
 		hero.addListeners();
 		hero.onHeroClick = onHeroClick;
+		hero.onHeroOuch = onHeroOuch;
+		hero.onHeroDead = onHeroDead;
 		console.log("key listeners are added");
+	}
+
+	function onHeroOuch()
+	{
+		ouchSound.currentTime = 0;
+		ouchSound.play();
+	}
+
+	function onHeroDead()
+	{
+		hero.onHeroClick = function(){};
+		hero.onHeroDead = function(){};
+
+		hero.active = false;
+
+		onTargetDead(hero);
+
+		resultText = "GAME OVER";
 	}
 
 	function _startRendering()
@@ -231,6 +321,7 @@ var game = (function()
 		//update
 		hero.update(modifier);
 		enemyPool.update(modifier);
+		stainPool.update();
 		bulletPool.update(modifier);
 		sight.update();
 		///////////
@@ -242,6 +333,7 @@ var game = (function()
 		bulletPool.render();
 		hero.render();
 		enemyPool.render();
+		stainPool.render();
 		sight.render();
 		///////////
 
@@ -253,7 +345,17 @@ var game = (function()
 		rectangle.font = "12px Helvetica";
 		rectangle.textAlign = "left";
 		rectangle.textBaseline = "top";
-		rectangle.fillText("fps: " + fps.toPrecision(4), 10, 10);
+		rectangle.fillText("fps: " + fps.toPrecision(4) + ", life: " + hero.life + ", enemies: " + enemyPool.enemyCount, 10, 10);
+
+		if (resultText)
+		{
+			rectangle.fillStyle = "rgb(250, 0, 0)";
+			rectangle.font = "24px Helvetica";
+			rectangle.textAlign = "left";
+			rectangle.textBaseline = "top";
+			rectangle.fillText(resultText, (canvas.width - resultText.length * 15)/2, canvas.height/2);
+		}
+
 		counter ++;
 		////////////////////
 
@@ -263,6 +365,9 @@ var game = (function()
 
 	function onHeroClick()
 	{
+		if(!hero.active || hero.confused)
+			return;
+
 		addBullet();
 
 		shootSound.currentTime = 0;
@@ -271,7 +376,7 @@ var game = (function()
 
 	function addBullet()
 	{
-		var options = {image: bulletImage, canvas: canvas, context: rectangle,  owner:hero};
+		var options = {image: bulletImage, canvas: canvas, context: rectangle,  owner:hero, targetPool: enemyPool.enemylist};
 		var bullet = new BulletControl(options);
 		bulletPool.add(bullet);
 	}
