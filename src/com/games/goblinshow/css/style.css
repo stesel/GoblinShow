@@ -21,6 +21,7 @@ body {
 }
 
 #logArea{
+	display:none;
 	position:fixed;
 	top:100px;
 	left:12px;
